@@ -1,9 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Jun 27 19:41:35 2017
 
-@author: Chaitra
-"""
 
 fo = open('co2a0000364.rd.000')
 
