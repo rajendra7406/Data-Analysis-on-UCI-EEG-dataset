@@ -1,6 +1,10 @@
 
+import seaborn as sns
+import matplotlib.pyplot as plt
+import pandas as pd #for dataframe
 import numpy as np
 import pickle
+
 #Import file from the pickle
 with open('readings.pickle','rb') as f:
     readingsDict = pickle.load(f)
@@ -9,7 +13,21 @@ readingCount = []
 for i in range(1,257):
      readingCount.append(i)
 
-import matplotlib.pyplot as plt
+channelCount = []
+for key in readingsDict.keys():
+    #storing keys as column names
+    channelCount.append(key)
+
+#creating dataframe
+readingsDataframe = pd.DataFrame(index=readingCount, columns=channelCount)
+#storing values in dataframe
+for key in readingsDict.keys():
+    #converting string values to float values in list
+    temp = list(map(float, readingsDict[key]))
+    #storing reading values to their respective columns 
+    readingsDataframe[key] = temp
+
+#_____________________plotting_________________________    
 #all recordings of one channel
 plt.xlabel('readings')
 plt.ylabel('value count')
@@ -24,35 +42,44 @@ plt.xlabel('readings')
 plt.ylabel('value count')
 plt.legend(handles=[OZ, P6, AF2])
 
-#plotting mean of all recordings of 64 channels
-#iterating through keys in list
-avgValues = []
+#____________________________________________________________________
+#creating dataframe with just avg values
+#creating one row for avg
+index = []
+index = [1]
+avgReadingsDataframe = pd.DataFrame(index=readingCount, columns=channelCount)
+
+#storing avg values in dataframe
 for key in readingsDict.keys():
     #converting string values to float values in list
     temp = list(map(float, readingsDict[key]))
-    #taking mean of all values from one channel
-    avg = np.mean(temp)
-    #appending mean value of single channel to yValues for plotting
-    avgValues.append(avg)
+    #storing reading values to their respective columns 
+    avgReadingsDataframe[key] = np.mean(temp)
 
-#plotting
-channelCount = []
-for i in range(1,65):
-     channelCount.append(i)
+#heatmap for avg values
+ax = sns.heatmap(avgReadingsDataframe, linewidths=.25)
 
-plt.xlabel('channel count')
-plt.ylabel('avg of all readings in single channel')
-plt.plot(channelCount, avgValues, label='avg values')
+#________heat map for all readings______________________________________________
+sns.heatmap(readingsDataframe)
+#cluster map
+sns.clustermap(readingsDataframe)
 
+#____________________3D plot 1 ___________________________
 
-import seaborn as sns
-uniform_data = [avgValues]
-ax = sns.heatmap(uniform_data, linewidth = 2)
+x = np.arange(len(readingsDataframe.columns))
+y = readingsDataframe.index
+X,Y = np.meshgrid(x,y)
+Z = readingsDataframe
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(X, Y, Z)
+ax.set_xlabel('channel')
+ax.set_ylabel('reading count')
+ax.set_zlabel('voltage')
 
-from mpl_toolkits.mplot3d import axes3d
-import matplotlib.pyplot as plt
+#____________________3D plot 2 ______________________________
+
 from matplotlib import style
-
 style.use('ggplot')
 
 fig = plt.figure()
@@ -80,92 +107,4 @@ ax1.set_ylabel('reading count')
 ax1.set_zlabel('voltage')
 
 plt.show()
-
-'''
-#experimentation
-from __future__ import print_function
-
-from mpl_toolkits.mplot3d import axes3d
-import matplotlib.pyplot as plt
-import numpy as np
-import time
-
-
-def generateVoltage(X, Y):
-    '''
-   # Generates Z data(voltage) for the points in the X(channelCount), Y() meshgrid and .
-    '''
-    print(X)
-    return X
-
-
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-
-# Make the X, Y meshgrid.
-timeSplit = np.linspace(0,1,256)
-X, Y = np.meshgrid(channelCount, timeSplit)
-
-# Set the z axis limits so they aren't recalculated each frame.
-ax.set_zlim(-64, 64)
-
-# Begin plotting.
-wframe = None
-tstart = time.time()
-for phi in range(1,13):
-    print(phi)
-    # If a line collection is already remove it before drawing.
-    if wframe:
-        ax.collections.remove(wframe)
-
-    # Plot the new wireframe and pause briefly before continuing.
-    Z = generateVoltage(X, Y)
-    wframe = ax.plot_wireframe(X, Y, Z, rstride=2, cstride=2)
-    plt.pause(.001)
-
-print('Average FPS: %f' % (100 / (time.time() - tstart)))
-
-"""
-Demonstrates using custom hillshading in a 3D surface plot.
-"""
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib import cbook
-from matplotlib import cm
-from matplotlib.colors import LightSource
-import matplotlib.pyplot as plt
-import numpy as np
-
-filename = cbook.get_sample_data('jacksboro_fault_dem.npz', asfileobj=False)
-a = np.load(filename)
-with np.load(filename) as dem:
-    z = dem['elevation']
-    nrows, ncols = z.shape
-    x = np.linspace(dem['xmin'], dem['xmax'], ncols)
-    y = np.linspace(dem['ymin'], dem['ymax'], nrows)
-    x, y = np.meshgrid(x, y)
-
-z = []
-z.append(1,2)
-for key in readingsDict.keys():
-    #converting string values to float values in list
-    temp = list(map(float, readingsDict[key]))
-    z.append(temp)
-    
-z = 
-x, y = np.meshgrid(channelCount, timeSplit)
-
-
-region = np.s_[5:50, 5:50]
-x, y, z = x[region], y[region], z[region]
-
-fig, ax = plt.subplots(subplot_kw=dict(projection='3d'))
-
-ls = LightSource(270, 45)
-# To use a custom hillshading mode, override the built-in shading and pass
-# in the rgb colors of the shaded surface calculated from "shade".
-rgb = ls.shade(z, cmap=cm.gist_earth, vert_exag=0.1, blend_mode='soft')
-surf = ax.plot_surface(x, y, z, rstride=1, cstride=1, facecolors=rgb,
-                       linewidth=0, antialiased=False, shade=False)
-
-plt.show()
-'''
+#_____________________end 3D plot_______________________________

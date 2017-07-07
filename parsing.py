@@ -1,5 +1,4 @@
-
-
+#Opening the file 
 fo = open('co2a0000364.rd.000')
 
 from collections import defaultdict
