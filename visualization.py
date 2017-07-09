@@ -5,9 +5,13 @@ import pandas as pd #for dataframe
 import numpy as np
 import pickle
 
-#Import file from the pickle
-with open('readings.pickle','rb') as f:
-    readingsDict = pickle.load(f)
+#Import dict serially from the pickle
+with open('readings.pickle', 'rb') as f: 
+    dictCount = pickle.load(f)
+    dictList = pickle.load(f)
+
+#using one dictionary for simplicity
+readingsDict = dictList[0]
 
 readingCount = []
 for i in range(1,257):
