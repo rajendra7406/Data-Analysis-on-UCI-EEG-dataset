@@ -1,79 +1,58 @@
-
 import seaborn as sns
 import matplotlib.pyplot as plt
-import pandas as pd #for dataframe
 import numpy as np
 import pickle
 
 #Import dict serially from the pickle
 with open('readings.pickle', 'rb') as f: 
     dictCount = pickle.load(f)
-    dictList = pickle.load(f)
-
+    alcDictList = pickle.load(f)
+    conDictList = pickle.load(f)
+    readingsdfL = pickle.load(f)
+    
 #using one dictionary for simplicity
-readingsDict = dictList[0]
+readingsDict = alcDictList[0]
 
-readingCount = []
-for i in range(1,257):
-     readingCount.append(i)
-
-channelCount = []
-for key in readingsDict.keys():
-    #storing keys as column names
-    channelCount.append(key)
-
-#creating dataframe
-readingsDataframe = pd.DataFrame(index=readingCount, columns=channelCount)
-#storing values in dataframe
-for key in readingsDict.keys():
-    #converting string values to float values in list
-    temp = list(map(float, readingsDict[key]))
-    #storing reading values to their respective columns 
-    readingsDataframe[key] = temp
-
+#using one dataframe for simplicity
+readingsdf = readingsdfL[0]
+    
 #_____________________plotting_________________________    
+#using pandas visualisation 
 #all recordings of one channel
-plt.xlabel('readings')
-plt.ylabel('value count')
-plt.plot(readingCount, readingsDict['OZ'], label='OZ channel')
+readingsdf.plot(y='OZ')
 
 #plotting all recordings of 3 channels
-#x values, y values, color
-OZ, = plt.plot(readingCount, readingsDict['OZ'], label='OZ channel')
-P6, = plt.plot(readingCount, readingsDict['P6'], label='P6 channel')
-AF2, = plt.plot(readingCount, readingsDict['AF2'], label='AF2 channel')
-plt.xlabel('readings')
-plt.ylabel('value count')
-plt.legend(handles=[OZ, P6, AF2])
-
+readingsdf.plot(y=['OZ','P6'])
 #____________________________________________________________________
 #creating dataframe with just avg values
-#creating one row for avg
-index = []
-index = [1]
-avgReadingsDataframe = pd.DataFrame(index=readingCount, columns=channelCount)
+avgdf = readingsdf.mean()
+avgdf = avgdf.to_frame(name=None)
 
-#storing avg values in dataframe
-for key in readingsDict.keys():
-    #converting string values to float values in list
-    temp = list(map(float, readingsDict[key]))
-    #storing reading values to their respective columns 
-    avgReadingsDataframe[key] = np.mean(temp)
+#density plot
+avgdf.plot.kde()
+
+tempdf = readingsdf.drop('category',1)
+
+#area plot
+readingsdf.plot.area(stacked=False)
 
 #heatmap for avg values
-ax = sns.heatmap(avgReadingsDataframe, linewidths=.25)
+ax = sns.heatmap(avgdf, linewidths=.25)
 
-#________heat map for all readings______________________________________________
-sns.heatmap(readingsDataframe)
+#heat map for all readings
+sns.heatmap(tempdf)
+
 #cluster map
-sns.clustermap(readingsDataframe)
+sns.clustermap(tempdf)
 
+#histogram plot
+readingsdf.hist()
 #____________________3D plot 1 ___________________________
 
-x = np.arange(len(readingsDataframe.columns))
-y = readingsDataframe.index
+x = np.arange(len(tempdf.columns))
+y = tempdf.index
 X,Y = np.meshgrid(x,y)
-Z = readingsDataframe
+Z = tempdf
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 ax.plot_surface(X, Y, Z)

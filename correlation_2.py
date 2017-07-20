@@ -1,35 +1,14 @@
 import pandas as pd
 import pickle
 import networkx as nx
+
 #Import dict serially from the pickle
 with open('readings.pickle', 'rb') as f: 
     dictCount = pickle.load(f)
-    dictList = pickle.load(f)
-            
-readingCount = []
-for i in range(1,257):
-     readingCount.append(i)
-
-
-dataframesList = []
-
-for i in range(len(dictList)):
-    readingsDict = dictList[i]
-    #storing values in dataframe
-    channelCount = []
-    for key in readingsDict.keys():
-        #storing keys as column names
-        channelCount.append(key)
-    #creating dataframe
-    readingsDataframe = pd.DataFrame(index=readingCount, columns=channelCount)
-    for key in readingsDict.keys():
-        #converting string values to float values in list
-        temp = list(map(float, readingsDict[key]))
-        #storing reading values to their respective columns 
-        readingsDataframe[key] = temp
-    #appending dataframe to the list
-    dataframesList.append(readingsDataframe)
-    
+    alcDictList = pickle.load(f)
+    conDictList = pickle.load(f)
+    readingsDataframeList = pickle.load(f)
+                
 posCorrPairsList = []
 negCorrPairsList = []
 #__________________higher correlation pairs__________________
@@ -54,7 +33,7 @@ def get_top_correlations(df, n=5):
 print("Top Correlation pairs:")
 pairCount = 10
 
-for dataframe in dataframesList:
+for dataframe in readingsDataframeList:
     posCorrPairs, negCorrPairs = get_top_correlations(dataframe, pairCount)
     posCorrPairsList.append(posCorrPairs)
     negCorrPairsList.append(negCorrPairs)

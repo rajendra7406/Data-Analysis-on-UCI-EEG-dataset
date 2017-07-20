@@ -3,50 +3,34 @@ import numpy as np
 import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
+
 #Import file from the pickle
-with open('readings.pickle','rb') as f:
-    readingsDict = pickle.load(f)
+with open('readings.pickle', 'rb') as f: 
+    dictCount = pickle.load(f)
+    alcDictList = pickle.load(f)
+    conDictList = pickle.load(f)
+    readingsDataframeList = pickle.load(f)
 
-readingCount = []
-for i in range(1,257):
-     readingCount.append(i)
-     
-channelCount = []
-for key in readingsDict.keys():
-    #storing keys as column names
-    channelCount.append(key)
+#for simplicity        
+readingsDataframe = readingsDataframeList[0]    
 
-readingsDataframe = pd.DataFrame(index=readingCount, columns=channelCount)
-
-#storing values in dataframe
-for key in readingsDict.keys():
-    #converting string values to float values in list
-    temp = list(map(float, readingsDict[key]))
-    #storing reading values to their respective columns 
-    readingsDataframe[key] = temp
-    
-
-#plotting the data
 #correlation matrix
 corr_df = readingsDataframe.corr(method='pearson')
-
-
 #_________plotting correlation matrix_______________________________
+sns.set()
 sns.heatmap(corr_df, cmap='RdYlGn_r' , linewidths=2.5)
 # Show the plot we reorient the labels for each column and row to make them easier to read.
 plt.yticks(rotation=0) 
 plt.xticks(rotation=90) 
 plt.show()  
-
+#___________________________________________
 #plotting half correlation matrix
 mask = np.zeros_like(corr_df)
 mask[np.triu_indices_from(mask)] = True
 with sns.axes_style("white"):
-     ax = sns.heatmap(corr_df,cmap='RdYlGn_r', mask=mask, vmax=.3, square=True)
-
+    ax = sns.heatmap(corr_df,cmap='RdYlGn_r', mask=mask, vmax=.3, square=True)
 
 #__________________higher correlation pairs__________________
-
 def get_redundant_pairs(df):
     '''Get diagonal and lower triangular pairs of correlation matrix'''
     pairs_to_drop = set()
