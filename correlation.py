@@ -17,7 +17,7 @@ readingsDataframe = readingsDataframeList[0]
 #correlation matrix
 corr_df = readingsDataframe.corr(method='pearson')
 #_________plotting correlation matrix_______________________________
-sns.set()
+
 sns.heatmap(corr_df, cmap='RdYlGn_r' , linewidths=2.5)
 # Show the plot we reorient the labels for each column and row to make them easier to read.
 plt.yticks(rotation=0) 
@@ -29,6 +29,8 @@ mask = np.zeros_like(corr_df)
 mask[np.triu_indices_from(mask)] = True
 with sns.axes_style("white"):
     ax = sns.heatmap(corr_df,cmap='RdYlGn_r', mask=mask, vmax=.3, square=True)
+
+tempdf = readingsDataframe.drop('category',1)
 
 #__________________higher correlation pairs__________________
 def get_redundant_pairs(df):
@@ -51,5 +53,5 @@ def get_top_correlations(df, n=5):
 print("Top Correlation pairs:")
 pairCount = 10
 
-posCorrPairs, negCorrPairs = get_top_correlations(readingsDataframe, pairCount)
+posCorrPairs, negCorrPairs = get_top_correlations(tempdf, pairCount)
 print('Positive Correlation pairs:',posCorrPairs,'Negative Correlation pairs:',negCorrPairs)

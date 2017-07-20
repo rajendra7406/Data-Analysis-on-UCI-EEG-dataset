@@ -34,16 +34,19 @@ print("Top Correlation pairs:")
 pairCount = 10
 
 for dataframe in readingsDataframeList:
-    posCorrPairs, negCorrPairs = get_top_correlations(dataframe, pairCount)
+    tempdf = dataframe.drop('category',1)
+    posCorrPairs, negCorrPairs = get_top_correlations(tempdf, pairCount)
     posCorrPairsList.append(posCorrPairs)
     negCorrPairsList.append(negCorrPairs)
     #print('Positive Correlation pairs:',posCorrPairs,'Negative Correlation pairs:',negCorrPairs)
 
 # this concats the 2 supplementary dfs row-wise into a single df
+#creating pos correlations dataframe
 final_df = pd.concat(posCorrPairsList, ignore_index=True)
     
 G = nx.from_pandas_dataframe(final_df,'level_0', 'level_1',True )
 
+#drawing network graph for top correlations
 labeldict = {}
 for nodes, u in G.nodes(data=True):
     labeldict[nodes]=nodes

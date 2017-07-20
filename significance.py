@@ -97,8 +97,8 @@ def normalitytest(df):
 
 print('Performing Normality test')
 print('No of electrodes which follow normal distribution')
-print('For alcoholics : ',normalitytest(df = 'alcReadDF'))            
-print('For controlled : ',normalitytest(df = 'conReadDF'))            
+print('For alcoholics : ',normalitytest(alcReadDF) )            
+print('For controlled : ',normalitytest(conReadDF) )            
 
 """
 pvalue < 0.05 satisfies for few electrodes(column)
@@ -106,7 +106,9 @@ Not all electrodes(column) follow normal distribution.
 So we apply transformation & again check for normality
 """
 import math
-#performing squaring transformation
+#performing squaring transformation 
+#---------Note: this will take ample amount of time
+
 for column in alcReadDF:
     if column != 'category':
         for index in range(1,257):
@@ -120,8 +122,8 @@ for column in conReadDF:
 #again checking for normality
 print('Performing Normality test after transformation')
 print('No of electrodes which follow normal distribution')
-print('For alcoholics : ',normalitytest(df = 'alcReadDF'))            
-print('For controlled : ',normalitytest(df = 'conReadDF'))            
+print('For alcoholics : ',normalitytest(alcReadDF) )            
+print('For controlled : ',normalitytest(conReadDF) )            
   
 #__the dataframe is now in normal distribution
 #___ performing 2 tailed t test
@@ -136,7 +138,35 @@ for column in alcReadDF:
         if pvalue<=0.05:
             print(column)
 
+#performing prediction------------------------
+#random forest classification
+mastertemp = masterdf.drop('category',1)
+X = mastertemp.iloc[:,:].values
+y = masterdf.iloc[:,0].values
 
+# Splitting the dataset into the Training set and Test set
+from sklearn.cross_validation import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.25, random_state = 0)
+
+# Feature Scaling
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
+
+#Fitting the random forest classification to the training set
+from sklearn.ensemble import RandomForestClassifier
+classifier = RandomForestClassifier(n_estimators = 10, criterion = 'entropy', random_state=0)
+classifier.fit(X_train, y_train)
+
+#Predicting the classifier
+y_pred = classifier.predict(X_test)
+
+#Producing confusion matrix
+from sklearn.metrics import confusion_matrix
+cm = confusion_matrix(y_test,y_pred)
+
+#the accuracy is 100% . this is overloading
 #___________________________________________________________
 #dataframe with avg values as rows
 lo = ['keys','alcAvg','conAvg']
@@ -151,9 +181,9 @@ for key in alcReadingsDict.keys():
     #storing reading values to their respective columns 
     dff.loc[key] = [key, alcmean,conmean ]
 
-alcmean.plot()
+
 #bar plot 
 #plotting average of each columnn for both alcholics and controlled dataframes
-dff.plot(x="keys", y=["alcAvg", "conAvg"])
+dff.plot(x="keys", y=["alcAvg", "conAvg"], kind='bar')
 
 

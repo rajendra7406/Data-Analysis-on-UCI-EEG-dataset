@@ -21,14 +21,14 @@ readingsdf = readingsdfL[0]
 #all recordings of one channel
 readingsdf.plot(y='OZ')
 
-#plotting all recordings of 3 channels
+#plotting all recordings of 2 channels
 readingsdf.plot(y=['OZ','P6'])
 #____________________________________________________________________
 #creating dataframe with just avg values
 avgdf = readingsdf.mean()
 avgdf = avgdf.to_frame(name=None)
 
-#density plot
+#density plot of average values
 avgdf.plot.kde()
 
 tempdf = readingsdf.drop('category',1)
